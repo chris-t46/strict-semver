@@ -1,0 +1,15 @@
+{
+  "name": "strict-semver",
+  "version": "0.1.0",
+  "description": "A validating semantic version parser and pretty printer, strict by default",
+  "main": "dist/semver.js",
+  "types": "dist/semver.d.ts",
+  "bin": {
+    "strict-semver": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "license": "MIT",
+  "author": "chris-t46"
+}
