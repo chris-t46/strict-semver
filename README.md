@@ -50,6 +50,29 @@ if (!result.ok) {
 `format` is a good way to normalize a version string once you've
 decided it's valid.
 
+## Comparing and sorting
+
+```ts
+import { parse, compare, sort, gt } from './src/semver'
+
+compare(parse('1.2.3'), parse('1.10.0'))
+// => -1 (1.2.3 is lower)
+
+gt(parse('2.0.0'), parse('1.9.9'))
+// => true
+
+sort([parse('1.2.3'), parse('1.0.0'), parse('1.2.3-beta')])
+// => [1.0.0, 1.2.3-beta, 1.2.3]
+```
+
+`compare` follows the precedence rules in section 11 of the spec:
+core versions compare numerically, a version with a prerelease is
+lower than the same version without one, and prerelease identifiers
+compare field by field (numeric fields numerically, everything else
+as ASCII strings). Build metadata never affects ordering. `eq`,
+`neq`, `gt`, `gte`, `lt`, and `lte` are convenience wrappers around
+`compare`, and `rsort` sorts highest first.
+
 ## CLI
 
 ```
@@ -80,6 +103,7 @@ Output goes to `dist/`.
 
 ## Status
 
-Early. Parsing and formatting a single version string works. Range
-parsing (`^1.2.3`, `~1.2.3`, `>=1.0.0 <2.0.0`) and comparison are not
-implemented yet — see the roadmap in the issue tracker.
+Early. Parsing, formatting, comparison, and sorting all work. Range
+parsing (`^1.2.3`, `~1.2.3`, `>=1.0.0 <2.0.0`) and a `satisfies()`
+check against those ranges are not implemented yet — see the roadmap
+in the issue tracker.

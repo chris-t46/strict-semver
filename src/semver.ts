@@ -98,6 +98,73 @@ export function format(version: SemVer): string {
   return out
 }
 
+// Precedence per spec section 11: major.minor.patch compared numerically,
+// then prerelease fields compared field-by-field (numeric fields compared
+// numerically, alphanumeric fields compared as ASCII strings, a numeric
+// field always has lower precedence than an alphanumeric one, and a
+// shorter prerelease is lower unless one side has no prerelease at all,
+// in which case the release version wins). Build metadata never affects
+// precedence, so it isn't consulted here.
+export function compare(a: SemVer, b: SemVer): -1 | 0 | 1 {
+  if (a.major !== b.major) return a.major < b.major ? -1 : 1
+  if (a.minor !== b.minor) return a.minor < b.minor ? -1 : 1
+  if (a.patch !== b.patch) return a.patch < b.patch ? -1 : 1
+
+  if (a.prerelease.length === 0 && b.prerelease.length === 0) return 0
+  if (a.prerelease.length === 0) return 1
+  if (b.prerelease.length === 0) return -1
+
+  const length = Math.max(a.prerelease.length, b.prerelease.length)
+  for (let i = 0; i < length; i++) {
+    if (i >= a.prerelease.length) return -1
+    if (i >= b.prerelease.length) return 1
+    const result = comparePrereleaseIdentifier(a.prerelease[i] as string | number, b.prerelease[i] as string | number)
+    if (result !== 0) return result
+  }
+  return 0
+}
+
+function comparePrereleaseIdentifier(a: string | number, b: string | number): -1 | 0 | 1 {
+  const aIsNumber = typeof a === 'number'
+  const bIsNumber = typeof b === 'number'
+  if (aIsNumber && bIsNumber) return a === b ? 0 : a < b ? -1 : 1
+  if (aIsNumber) return -1
+  if (bIsNumber) return 1
+  return a === b ? 0 : a < b ? -1 : 1
+}
+
+export function eq(a: SemVer, b: SemVer): boolean {
+  return compare(a, b) === 0
+}
+
+export function neq(a: SemVer, b: SemVer): boolean {
+  return compare(a, b) !== 0
+}
+
+export function gt(a: SemVer, b: SemVer): boolean {
+  return compare(a, b) === 1
+}
+
+export function gte(a: SemVer, b: SemVer): boolean {
+  return compare(a, b) !== -1
+}
+
+export function lt(a: SemVer, b: SemVer): boolean {
+  return compare(a, b) === -1
+}
+
+export function lte(a: SemVer, b: SemVer): boolean {
+  return compare(a, b) !== 1
+}
+
+export function sort(versions: SemVer[]): SemVer[] {
+  return [...versions].sort(compare)
+}
+
+export function rsort(versions: SemVer[]): SemVer[] {
+  return [...versions].sort((a, b) => compare(b, a))
+}
+
 function splitOnce(value: string, separator: string): [string, string | undefined] {
   const index = value.indexOf(separator)
   if (index === -1) {
