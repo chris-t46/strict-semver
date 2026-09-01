@@ -73,6 +73,38 @@ as ASCII strings). Build metadata never affects ordering. `eq`,
 `neq`, `gt`, `gte`, `lt`, and `lte` are convenience wrappers around
 `compare`, and `rsort` sorts highest first.
 
+## Ranges
+
+```ts
+import { parseRange } from './src/range'
+
+parseRange('^1.2.3')
+// => { sets: [[
+//   { operator: '>=', version: { major: 1, minor: 2, patch: 3, ... } },
+//   { operator: '<',  version: { major: 2, minor: 0, patch: 0, ... } },
+// ]] }
+
+parseRange('~1.2.3')
+// => >=1.2.3 <1.3.0, expressed the same way
+
+parseRange('>=1.0.0 <2.0.0')
+// => a single comparator set with both bounds as given
+
+parseRange('1.2.3 || 2.0.0 - nope')
+// throws SemVerError — comparator sets are joined by "||", not "-"
+```
+
+`parseRange` turns `^`, `~`, and explicit comparators (`=`, `>`, `>=`,
+`<`, `<=`) into comparator sets. Space-separated comparators within a
+set are ANDed together; sets joined by `||` are ORed. `^` and `~` are
+shorthand — they expand to a `>=`/`<` pair, so anything consuming a
+`Range` only ever has to deal with plain comparators. Every version in
+a range must be a full `major.minor.patch`, same as `parse()` in
+strict mode; pass `{ lenient: true }` to relax that the same way.
+
+There's no `satisfies()` yet — that's next, to actually test a
+version against a `Range`.
+
 ## CLI
 
 ```
@@ -103,7 +135,7 @@ Output goes to `dist/`.
 
 ## Status
 
-Early. Parsing, formatting, comparison, and sorting all work. Range
-parsing (`^1.2.3`, `~1.2.3`, `>=1.0.0 <2.0.0`) and a `satisfies()`
-check against those ranges are not implemented yet — see the roadmap
-in the issue tracker.
+Early. Parsing, formatting, comparison, sorting, and range parsing all
+work. A `satisfies()` check that tests a version against a `Range` is
+not implemented yet, and neither are unit tests — see the roadmap in
+the issue tracker.
