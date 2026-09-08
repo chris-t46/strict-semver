@@ -11,7 +11,7 @@
 // full major.minor.patch (matching the README's examples); partial
 // versions like "^1.2" or ">=1" are not accepted.
 
-import { parse, type ParseOptions, type SemVer, SemVerError } from './semver'
+import { eq, gt, gte, lt, lte, parse, type ParseOptions, type SemVer, SemVerError } from './semver'
 
 export type ComparatorOperator = '=' | '>' | '>=' | '<' | '<='
 
@@ -37,6 +37,27 @@ export function parseRange(input: string, options: ParseOptions = {}): Range {
 
   const sets = trimmed.split('||').map((part) => parseComparatorSet(part, lenient, input))
   return { sets }
+}
+
+// A version satisfies a range if it matches every comparator in at least
+// one set (sets are ORed, comparators within a set are ANDed).
+export function satisfies(version: SemVer, range: Range): boolean {
+  return range.sets.some((set) => set.every((comparator) => comparatorMatches(version, comparator)))
+}
+
+function comparatorMatches(version: SemVer, comparator: Comparator): boolean {
+  switch (comparator.operator) {
+    case '=':
+      return eq(version, comparator.version)
+    case '>':
+      return gt(version, comparator.version)
+    case '>=':
+      return gte(version, comparator.version)
+    case '<':
+      return lt(version, comparator.version)
+    case '<=':
+      return lte(version, comparator.version)
+  }
 }
 
 function parseComparatorSet(part: string, lenient: boolean, input: string): ComparatorSet {

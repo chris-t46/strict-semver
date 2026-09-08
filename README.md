@@ -102,8 +102,26 @@ shorthand — they expand to a `>=`/`<` pair, so anything consuming a
 a range must be a full `major.minor.patch`, same as `parse()` in
 strict mode; pass `{ lenient: true }` to relax that the same way.
 
-There's no `satisfies()` yet — that's next, to actually test a
-version against a `Range`.
+```ts
+import { parseRange, satisfies } from './src/range'
+import { parse } from './src/semver'
+
+satisfies(parse('1.2.4'), parseRange('^1.2.3'))
+// => true
+
+satisfies(parse('2.0.0'), parseRange('^1.2.3'))
+// => false
+
+satisfies(parse('1.5.0'), parseRange('1.0.0 - nope'))
+// (parseRange itself would throw here — comparator sets use "||", not "-")
+
+satisfies(parse('3.0.0'), parseRange('^1.2.3 || >=3.0.0'))
+// => true, matches the second set
+```
+
+`satisfies` tests a parsed version against a `Range` using the same
+precedence rules as `compare`: it matches if the version satisfies
+every comparator in at least one of the range's sets.
 
 ## CLI
 
@@ -135,7 +153,6 @@ Output goes to `dist/`.
 
 ## Status
 
-Early. Parsing, formatting, comparison, sorting, and range parsing all
-work. A `satisfies()` check that tests a version against a `Range` is
-not implemented yet, and neither are unit tests — see the roadmap in
-the issue tracker.
+Early. Parsing, formatting, comparison, sorting, range parsing, and
+`satisfies()` all work. There are no unit tests yet — see the roadmap
+in the issue tracker.
