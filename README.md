@@ -151,8 +151,19 @@ npx tsc -p .
 
 Output goes to `dist/`.
 
+## Testing
+
+```
+npm test
+```
+
+Runs the suite in `src/semver.test.ts` against a fresh build, using
+Node's built-in test runner (`node --test`) — no test framework
+dependency required.
+
 ## Status
 
 Early. Parsing, formatting, comparison, sorting, range parsing, and
-`satisfies()` all work. There are no unit tests yet — see the roadmap
-in the issue tracker.
+`satisfies()` all work, and `parse`/`format`/`compare` have unit test
+coverage. Range parsing and `satisfies()` still need tests before
+publishing.
