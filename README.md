@@ -157,13 +157,12 @@ Output goes to `dist/`.
 npm test
 ```
 
-Runs the suite in `src/semver.test.ts` against a fresh build, using
-Node's built-in test runner (`node --test`) — no test framework
-dependency required.
+Runs the suite in `src/semver.test.ts` and `src/range.test.ts` against
+a fresh build, using Node's built-in test runner (`node --test`) — no
+test framework dependency required.
 
 ## Status
 
 Early. Parsing, formatting, comparison, sorting, range parsing, and
-`satisfies()` all work, and `parse`/`format`/`compare` have unit test
-coverage. Range parsing and `satisfies()` still need tests before
-publishing.
+`satisfies()` all work, and all of it has unit test coverage. The CLI
+still needs integration tests before publishing.
