@@ -157,12 +157,15 @@ Output goes to `dist/`.
 npm test
 ```
 
-Runs the suite in `src/semver.test.ts` and `src/range.test.ts` against
-a fresh build, using Node's built-in test runner (`node --test`) — no
-test framework dependency required.
+Runs the suite in `src/semver.test.ts`, `src/range.test.ts`, and
+`src/cli.test.ts` against a fresh build, using Node's built-in test
+runner (`node --test`) — no test framework dependency required. The
+CLI tests spawn the compiled `dist/cli.js` as a real subprocess and
+check its stdout, stderr, and exit code, rather than calling into
+`main()` directly.
 
 ## Status
 
-Early. Parsing, formatting, comparison, sorting, range parsing, and
-`satisfies()` all work, and all of it has unit test coverage. The CLI
-still needs integration tests before publishing.
+Early. Parsing, formatting, comparison, sorting, range parsing,
+`satisfies()`, and the CLI all work and have test coverage. Not yet
+published to npm.
