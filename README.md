@@ -167,5 +167,11 @@ check its stdout, stderr, and exit code, rather than calling into
 ## Status
 
 Early. Parsing, formatting, comparison, sorting, range parsing,
-`satisfies()`, and the CLI all work and have test coverage. Not yet
-published to npm.
+`satisfies()`, and the CLI all work and have test coverage.
+
+The package entry point is `dist/index.js`, which re-exports everything
+from `semver` and `range`, so once installed you can write
+`import { parse, parseRange, satisfies } from 'strict-semver'`. The
+published tarball contains only the compiled output (test files are
+excluded), and `prepublishOnly` runs the test suite before `npm publish`.
+It has not been published yet.

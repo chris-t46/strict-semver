@@ -2,14 +2,29 @@
   "name": "strict-semver",
   "version": "0.1.0",
   "description": "A validating semantic version parser and pretty printer, strict by default",
-  "main": "dist/semver.js",
-  "types": "dist/semver.d.ts",
+  "keywords": [
+    "semver",
+    "version",
+    "parser",
+    "validation",
+    "range"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "strict-semver": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "!dist/**/*.test.*"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsc -p .",
-    "test": "tsc -p . && node --test dist"
+    "test": "tsc -p . && node --test dist",
+    "prepublishOnly": "npm test"
   },
   "license": "MIT",
   "author": "chris-t46"
