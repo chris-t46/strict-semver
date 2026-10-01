@@ -90,12 +90,15 @@ parseRange('~1.2.3')
 parseRange('>=1.0.0 <2.0.0')
 // => a single comparator set with both bounds as given
 
+parseRange('1.2.3 - 2.3.4')
+// => >=1.2.3 <=2.3.4, inclusive on both ends
+
 parseRange('1.2.3 || 2.0.0 - nope')
-// throws SemVerError — comparator sets are joined by "||", not "-"
+// throws SemVerError — "nope" is not a version
 ```
 
-`parseRange` turns `^`, `~`, and explicit comparators (`=`, `>`, `>=`,
-`<`, `<=`) into comparator sets. Space-separated comparators within a
+`parseRange` turns `^`, `~`, hyphen ranges (`1.2.3 - 2.3.4`), and
+explicit comparators (`=`, `>`, `>=`, `<`, `<=`) into comparator sets. Space-separated comparators within a
 set are ANDed together; sets joined by `||` are ORed. `^` and `~` are
 shorthand — they expand to a `>=`/`<` pair, so anything consuming a
 `Range` only ever has to deal with plain comparators. Every version in
@@ -112,8 +115,8 @@ satisfies(parse('1.2.4'), parseRange('^1.2.3'))
 satisfies(parse('2.0.0'), parseRange('^1.2.3'))
 // => false
 
-satisfies(parse('1.5.0'), parseRange('1.0.0 - nope'))
-// (parseRange itself would throw here — comparator sets use "||", not "-")
+satisfies(parse('1.5.0'), parseRange('1.0.0 - 2.0.0'))
+// => true
 
 satisfies(parse('3.0.0'), parseRange('^1.2.3 || >=3.0.0'))
 // => true, matches the second set

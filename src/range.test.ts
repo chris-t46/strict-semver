@@ -65,6 +65,48 @@ test('"||" joins multiple comparator sets', () => {
   assert.deepEqual(range.sets[1], [{ operator: '>=', version: parse('3.0.0') }])
 })
 
+test('hyphen range expands to an inclusive >= / <= pair', () => {
+  const range = parseRange('1.2.3 - 2.3.4')
+  assert.deepEqual(range.sets, [
+    [
+      { operator: '>=', version: parse('1.2.3') },
+      { operator: '<=', version: parse('2.3.4') },
+    ],
+  ])
+})
+
+test('hyphen range can be combined with other comparators and "||" sets', () => {
+  const range = parseRange('1.0.0 - 2.0.0 <1.5.0 || 3.0.0')
+  assert.equal(range.sets.length, 2)
+  assert.equal(range.sets[0].length, 3)
+  assert.equal(satisfies(parse('1.2.0'), range), true)
+  assert.equal(satisfies(parse('1.7.0'), range), false)
+  assert.equal(satisfies(parse('3.0.0'), range), true)
+})
+
+test('hyphen range includes both endpoints', () => {
+  const range = parseRange('1.0.0 - 2.0.0')
+  assert.equal(satisfies(parse('1.0.0'), range), true)
+  assert.equal(satisfies(parse('2.0.0'), range), true)
+  assert.equal(satisfies(parse('2.0.1'), range), false)
+})
+
+test('a prerelease hyphen inside a version is not a range operator', () => {
+  const range = parseRange('1.0.0-beta.1 - 1.0.0')
+  assert.equal(satisfies(parse('1.0.0-beta.2'), range), true)
+})
+
+test('rejects a hyphen with a missing side', () => {
+  assert.throws(() => parseRange('1.0.0 -'), /"-" must sit between two versions/)
+  assert.throws(() => parseRange('- 2.0.0'), /"-" must sit between two versions/)
+  assert.throws(() => parseRange('1.0.0 - - 2.0.0'), /"-" must sit between two versions/)
+})
+
+test('rejects an invalid version on either side of a hyphen', () => {
+  assert.throws(() => parseRange('1.0.0 - nope'), SemVerError)
+  assert.throws(() => parseRange('>=1.0.0 - 2.0.0'), SemVerError)
+})
+
 test('rejects an empty range string', () => {
   assert.throws(() => parseRange(''), /range string is empty/)
   assert.throws(() => parseRange('   '), /range string is empty/)

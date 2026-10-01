@@ -1,5 +1,6 @@
 // Range parsing for the comparator syntax used by version specifiers:
-// caret (^1.2.3), tilde (~1.2.3), and explicit comparators (>=1.0.0 <2.0.0).
+// caret (^1.2.3), tilde (~1.2.3), hyphen ranges (1.0.0 - 2.0.0), and
+// explicit comparators (>=1.0.0 <2.0.0).
 //
 // A range is one or more comparator sets joined by "||" (any set may
 // match); within a set, comparators are joined by whitespace (all must
@@ -67,8 +68,21 @@ function parseComparatorSet(part: string, lenient: boolean, input: string): Comp
   }
 
   const comparators: Comparator[] = []
-  for (const token of tokens) {
-    if (token.startsWith('^')) {
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i]
+    // A standalone "-" is the hyphen range operator. Hyphens inside a
+    // version (1.0.0-beta) are never separate tokens, so this can't clash.
+    if (token === '-') {
+      throw new SemVerError('"-" must sit between two versions', input)
+    }
+    if (tokens[i + 1] === '-') {
+      const upper = tokens[i + 2]
+      if (upper === undefined || upper === '-') {
+        throw new SemVerError('"-" must sit between two versions', input)
+      }
+      comparators.push(...hyphenComparators(token, upper, lenient))
+      i += 2
+    } else if (token.startsWith('^')) {
       comparators.push(...caretComparators(token.slice(1), lenient, input))
     } else if (token.startsWith('~')) {
       comparators.push(...tildeComparators(token.slice(1), lenient, input))
@@ -95,6 +109,15 @@ function parseComparator(token: string, lenient: boolean, input: string): Compar
   }
 
   return { operator, version: parse(versionPart, { lenient }) }
+}
+
+// "1.0.0 - 2.0.0" is inclusive on both ends. Operators aren't allowed on
+// either side; the version parser rejects them as malformed versions.
+function hyphenComparators(lower: string, upper: string, lenient: boolean): [Comparator, Comparator] {
+  return [
+    { operator: '>=', version: parse(lower, { lenient }) },
+    { operator: '<=', version: parse(upper, { lenient }) },
+  ]
 }
 
 function caretComparators(versionPart: string, lenient: boolean, input: string): [Comparator, Comparator] {
